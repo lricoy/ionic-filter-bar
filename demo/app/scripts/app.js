@@ -42,15 +42,34 @@ angular.module('Demo', ['ionic', 'jett.ionic.filter.bar'])
     });
   })
 
-  .controller('MainController', function($scope, $timeout, $ionicFilterBar) {
+  .factory('geoData', ['$http', '$q', 'limitToFilter', function ($http, $q, limitToFilter) {
+  	return {
+  		getCities: function(query, options) {
+        var deferred = $q.defer();
+  			var url = "http://gd.geobytes.com/AutoCompleteCity?callback=JSON_CALLBACK&q=";
+
+  			$http.jsonp(url + encodeURIComponent(query))
+  					.success(function (result) {
+  						deferred.resolve(result);
+  					})
+            .error(function(err){
+              deferred.reject(err);
+            });
+
+        return deferred.promise;
+  		}
+  	}
+  }])
+
+  .controller('MainController', function($scope, $timeout, $ionicFilterBar, geoData) {
 
     var filterBarInstance;
 
     function getItems () {
       var items = [];
-      for (var x = 1; x < 2000; x++) {
-        items.push({text: 'This is item number ' + x + ' which is an ' + (x % 2 === 0 ? 'EVEN' : 'ODD') + ' number.'});
-      }
+      // for (var x = 1; x < 2000; x++) {
+      //   items.push({text: 'This is item number ' + x + ' which is an ' + (x % 2 === 0 ? 'EVEN' : 'ODD') + ' number.'});
+      // }
       $scope.items = items;
     }
 
@@ -58,11 +77,13 @@ angular.module('Demo', ['ionic', 'jett.ionic.filter.bar'])
 
     $scope.showFilterBar = function () {
       filterBarInstance = $ionicFilterBar.show({
-        items: $scope.items,
+        items: [],
         update: function (filteredItems, filterText) {
-          $scope.items = filteredItems;
-          if (filterText) {
-            console.log(filterText);
+          if(filterText.length >= 3) {
+            $scope.cities = geoData.getCities(filterText);
+            $scope.cities.then(function(data){
+              $scope.items = data;
+            });  
           }
         }
       });
@@ -80,5 +101,3 @@ angular.module('Demo', ['ionic', 'jett.ionic.filter.bar'])
       }, 1000);
     };
   });
-
-
