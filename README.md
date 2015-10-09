@@ -2,6 +2,7 @@
 
 #Ionic Filter Bar
 >A platform specific search filter plugin for the Ionic Framework (iOS / Android)
+>This forks use Geobytes AJAX/JSONP API to fetch city data from the query given on the plugin
 
 ## Table of Contents
  - [Demo](#demo)
